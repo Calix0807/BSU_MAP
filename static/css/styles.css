@@ -1,0 +1,40 @@
+/* Give the map real height */
+html, body { height: 100%; margin: 0; }
+#map { height: 100vh; }
+
+/* Light grid background (since there is no image) */
+#map {
+  background:
+    linear-gradient(to right, rgba(0,0,0,.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,.05) 1px, transparent 1px),
+    #fff;
+  background-size: 40px 40px, 40px 40px, auto;
+}
+
+/* Topbar + info */
+#topbar, #info {
+  position: absolute; left: 10px; right: 10px; z-index: 1000;
+  background: rgba(255,255,255,.95);
+  padding: 8px 10px; border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+}
+#topbar { top: 10px; display: flex; gap: 8px; align-items: center; }
+#info   { bottom: 10px; }
+
+/* Building labels */
+.bldg-label {
+  background: rgba(255,255,255,.9);
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+/* Schedule dialog */
+dialog::backdrop { background: rgba(0,0,0,.35); }
+.sched-card { min-width: 420px; background: #fff; padding: 16px; border: 0; border-radius: 12px; }
+.sched-card table { width: 100%; border-collapse: collapse; }
+.sched-card th, .sched-card td { border-bottom: 1px solid #eee; padding: 6px; text-align: left; }
+.sched-card th { background: #fafafa; }

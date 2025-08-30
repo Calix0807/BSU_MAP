@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ building.name if building else "Building" }}</title>
+  <link rel="stylesheet" href="/static/css/styles.css"/>
+  <style>
+    body { font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; margin:0; padding:24px; background:#f7f7f7 }
+    .btn { display:inline-block; padding:8px 12px; border:1px solid #ddd; border-radius:8px; background:#fff; text-decoration:none; color:#111 }
+    .btn:hover { background:#f3f4f6 }
+    .card { background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(0,0,0,.08); padding:16px; margin:16px 0 }
+    .list { display:grid; gap:8px }
+    .row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border:1px solid #eee; border-radius:10px; background:#fafafa; cursor:pointer }
+    .row:hover { background:#f2f4f7 }
+    .badge { font-size:12px; padding:2px 8px; border-radius:999px; background:#e5e7eb }
+    .hidden { display:none }
+    table { width:100%; border-collapse:collapse; margin-top:8px }
+    th, td { border-bottom:1px solid #eee; padding:8px; text-align:left }
+    th { background:#fafafa }
+  </style>
+</head>
+<body>
+  <a class="btn" href="/">← Back to Map</a>
+
+  {% if not building %}
+    <div class="card"><h2>Building not found.</h2></div>
+  {% else %}
+    <div class="card">
+      <h2 style="margin:0">{{ building.name }}</h2>
+      <p style="margin:.25rem 0 0">ID: <code>{{ building.id }}</code></p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 12px">Rooms</h3>
+      {% if rooms %}
+        <div class="list">
+          {% for r in rooms %}
+            <div class="row" data-room-id="{{ r.id }}">
+              <div><strong>{{ r.name }}</strong></div>
+              <div class="badge">Click to view schedule</div>
+            </div>
+            <div id="sched-{{ r.id }}" class="hidden">
+              {% set rs = schedules.get(r.id, []) %}
+              {% if rs %}
+                <table>
+                  <thead>
+                    <tr><th>Day</th><th>Start</th><th>End</th><th>Subject</th><th>Section</th></tr>
+                  </thead>
+                  <tbody>
+                    {% for s in rs %}
+                      <tr>
+                        <td>{{ s.day }}</td>
+                        <td>{{ s.start }}</td>
+                        <td>{{ s.end }}</td>
+                        <td>{{ s.subject }}</td>
+                        <td>{{ s.section }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% else %}
+                <p style="margin:8px 0 0">No schedule available.</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No rooms defined for this building yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 12px">Comfort Rooms (CR)</h3>
+      {% if crs %}
+        <div class="list">
+          {% for c in crs %}
+            <div class="row" style="cursor:default">
+              <div><strong>{{ c.name }}</strong></div>
+              <div class="badge">Facility</div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No CR listed for this building.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <script>
+    document.querySelectorAll('[data-room-id]').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.getAttribute('data-room-id');
+        const panel = document.getElementById('sched-' + id);
+        if (panel) panel.classList.toggle('hidden');
+      });
+    });
+  </script>
+</body>
+</html>

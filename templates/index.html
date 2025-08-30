@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>BSU Hagonoy – Interactive Map</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100vh; }
+
+    #topbar, #info {
+      position: absolute; left: 10px; right: 10px; z-index: 1000;
+      background: rgba(255,255,255,.95); padding: 8px 10px; border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,.08);
+      font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    #topbar { top: 10px; display: flex; gap: 8px; align-items: center; }
+    #info { bottom: 10px; }
+
+    .bldg-label {
+      background: rgba(255,255,255,.9);
+      border: 1px solid rgba(0,0,0,.15);
+      border-radius: 6px; padding: 2px 6px; font-weight: 600;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Controls -->
+  <div id="topbar">
+    <select id="from"></select>
+    <select id="to"></select>
+    <button id="routeBtn">Find Route</button>
+    <button id="homeBtn">Home</button>
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+
+  <!-- Info -->
+  <div id="info">Click a building to view rooms and schedules.</div>
+
+  <!-- Optional schedule dialog (shown on dblclick from app.js) -->
+  <dialog id="schedDlg">
+    <form method="dialog">
+      <h3 id="schedTitle">Schedules</h3>
+      <div id="schedBody"></div>
+      <menu><button value="cancel">Close</button></menu>
+    </form>
+  </dialog>
+<!-- Building Details Modal -->
+<dialog id="buildingDlg">
+  <form method="dialog" style="max-width: 720px; width: 92vw; border: none; padding: 0;">
+    <div style="background:#fff; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.2); overflow:hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid #eee;">
+        <h3 id="bldgTitle" style="margin:0; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif">Building</h3>
+        <button id="closeBuildingDlg" value="cancel" style="border:none; background:#f3f4f6; border-radius:8px; padding:6px 10px; cursor:pointer">Close ✕</button>
+      </div>
+
+      <div style="padding:16px; font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif">
+        <section style="margin-bottom:16px">
+          <h4 style="margin:0 0 8px">Rooms</h4>
+          <div id="bldgRooms"></div>
+        </section>
+
+        <section>
+          <h4 style="margin:0 0 8px">Comfort Rooms (CR)</h4>
+          <div id="bldgCRs"></div>
+        </section>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="/static/js/app.js?v=13"></script>
+</body>
+</html>
