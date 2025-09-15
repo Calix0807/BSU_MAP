@@ -3,7 +3,7 @@
   "buildings": [
     { "id": "main_gate", "name": "Main Gate", "x": 420, "y": 1020, "w": 150, "h": 50, "type": "building" },
     { "id": "activity", "name": "Activity Center", "x": 240, "y": 820, "w": 260, "h": 180, "img": "/static/img/buildings/activity.png", "type": "building" },
-    { "id": "it", "name": "IT Building", "x": 650, "y": 820, "w": 280, "h": 320, "img": "/static/img/buildings/it.png", "type": "building" },
+    { "id": "it", "name": "IT Building", "x": 650, "y": 820, "w": 400, "h": 400, "img": "/static/img/buildings/it.png", "type": "building" },
     { "id": "main_bldg", "name": "Main Building", "x": 220, "y": 460, "w": 320, "h": 360, "img": "/static/img/buildings/main_bldg.png", "type": "building" },
     { "id": "canteen", "name": "Canteen", "x": -100, "y": 480, "w": 260, "h": 260, "img": "/static/img/buildings/canteen.png", "type": "building" },
     { "id": "hatchery", "name": "Hatchery", "x": -400, "y": 540, "w": 250, "h": 210, "img": "/static/img/buildings/hatchery.png", "type": "building" },
