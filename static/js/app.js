@@ -67,22 +67,13 @@
 
     map.fitBounds(bounds);
 
-    // -----------------------------
     // ✅ Re-enable zoom interactions
-    // -----------------------------
     map.scrollWheelZoom.enable();
     map.doubleClickZoom.enable();
     map.touchZoom.enable();
     map.boxZoom.enable();
     map.keyboard.enable();
     L.control.zoom({ position: 'topright' }).addTo(map);
-
-    // ------------------------------------------
-    // Optional soft clamping (no hard snap back)
-    // ------------------------------------------
-    // If you still want to prevent panning far away from campus, use soft bounds:
-    // map.setMaxBounds(bounds.pad(0.5));        // larger allowable box
-    // map.options.maxBoundsViscosity = 0.2;     // soft resistance near edges
 
     // --- Z-index panes so the red route is always on top ---
     map.createPane('pane-boxes');    map.getPane('pane-boxes').style.zIndex    = 400;
@@ -109,26 +100,35 @@
       return [[Y(b.y + hh), b.x - hw], [Y(b.y - hh), b.x + hw]];
     };
 
-    // -------- Buildings (rectangles + labels + click -> modal) --------
+    // -------- Buildings (image overlays if available, otherwise rectangles) --------
     (data.buildings || []).forEach(b => {
-      const r = L.rectangle(rectBounds(b), {
-        pane: 'pane-boxes',
-        weight: 2,
-        opacity: 1,
-        color: "#3b82f6",
-        fillColor: "#3b82f6",
-        fillOpacity: 0.15
-      }).addTo(boxes);
+      if (b.img) {
+        // Make overlay interactive so it can receive click events
+        const img = L.imageOverlay(b.img, rectBounds(b), {
+          pane: 'pane-boxes',
+          interactive: true,      // <-- REQUIRED for clicks
+          opacity: 1
+        }).addTo(boxes);
 
-      r.bindTooltip(b.name, {
-        direction: "center",
-        permanent: true,
-        className: "bldg-label"
-      });
+        // Optional pointer cursor
+        img.getElement?.()?.style && (img.getElement().style.cursor = 'pointer');
 
-      // Open popup with Rooms + CRs (no page navigation)
-      r.on("click", () => openBuildingModal(b));
+        img.bindTooltip(b.name, { direction: "center", permanent: true, className: "bldg-label" });
+        img.on("click", () => openBuildingModal(b));
+      } else {
+        const r = L.rectangle(rectBounds(b), {
+          pane: 'pane-boxes',
+          weight: 2,
+          opacity: 1,
+          color: "#3b82f6",
+          fillColor: "#3b82f6",
+          fillOpacity: 0.15
+        }).addTo(boxes);
+        r.bindTooltip(b.name, { direction: "center", permanent: true, className: "bldg-label" });
+        r.on("click", () => openBuildingModal(b));
+      }
 
+      // Populate route selects
       fromEl.add(new Option(b.name, b.id));
       toEl.add(new Option(b.name, b.id));
     });
@@ -141,7 +141,6 @@
     const anchors = {};   // buildingId -> Set(nodeKey) attached walkway nodes
     let viaCounter = 0;
 
-    // snap/merge nodes that are basically the same point so junctions connect
     const SNAP_EPS = 2;
     const findExistingKey = (x, y) => {
       for (const [k, p] of Object.entries(nodes)) {
@@ -171,25 +170,18 @@
 
       const vias = Array.isArray(w.via) ? w.via.slice() : [];
 
-      // Draw only the shaped part (VIA points). If none, draw direct A<->B.
       const drawXY = vias.length ? vias : [[A.x, A.y], [B.x, B.y]];
       const drawLatLng = drawXY.map(([x, y]) => [Y(y), x]);
       L.polyline(drawLatLng, { pane: 'pane-walkways', weight: 6, opacity: 0.95, color: LINE_COLOR })
         .addTo(walk)
         .on("click", () => showInfo(`<b>Walkway:</b> ${A.name} ↔ ${B.name}`));
 
-      // Build graph:
       if (vias.length) {
-        // Nodes are only VIA points
         const seqKeys = vias.map(([x, y]) => addViaNode(x, y));
         for (let i = 1; i < seqKeys.length; i++) addEdge(seqKeys[i - 1], seqKeys[i]);
-
-        // Attach buildings to the ends of the VIA chain (anchors)
         addAnchor(w.from, seqKeys[0]);
         addAnchor(w.to,   seqKeys[seqKeys.length - 1]);
       } else {
-        // No VIA supplied: fallback to a straight segment between building centers
-        // (recommend adding at least one VIA at each building edge to avoid center-lines)
         const k1 = addViaNode(A.x, A.y);
         const k2 = addViaNode(B.x, B.y);
         addEdge(k1, k2);
@@ -241,14 +233,6 @@
       });
 
       L.polyline(latlngs, { pane: 'pane-route', weight: 6, opacity: 0.95, color: "red" }).addTo(route);
-
-      // ❌ No auto-zoom on route:
-      // map.fitBounds(L.latLngBounds(latlngs).pad(0.2));
-
-      // ✅ Optional: pan only (no zoom). Uncomment if you want it:
-      // const center = L.latLngBounds(latlngs).getCenter();
-      // map.panTo(center, { animate: true });
-
       showInfo(`<b>Route:</b> ${byId[sId].name} → ${byId[tId].name}`);
     };
 
@@ -287,7 +271,6 @@
           </tbody>
         </table>` : `<p style="margin:8px 0 0">No schedule available.</p>`;
 
-      // Rooms list (click to toggle schedule)
       if (rooms.length) {
         bRooms.innerHTML = rooms.map(r => `
           <div class="row" data-room-id="${r.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fafafa;cursor:pointer;margin:6px 0">
@@ -300,7 +283,6 @@
         bRooms.innerHTML = `<p>No rooms defined for this building yet.</p>`;
       }
 
-      // CR list
       if (crs.length) {
         bCRs.innerHTML = crs.map(c => `
           <div class="row" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fafafa;margin:6px 0">
@@ -312,14 +294,14 @@
         bCRs.innerHTML = `<p>No CR listed for this building.</p>`;
       }
 
-      // bind toggles
+      // Toggle schedules
       bdlg.querySelectorAll('[data-room-id]').forEach(row => {
         row.addEventListener('click', () => {
           const id = row.getAttribute('data-room-id');
           const panel = document.getElementById('sched-' + id);
           if (!panel) return;
-          const isHidden = panel.style.display === 'none' || !panel.style.display;
-          panel.style.display = isHidden ? 'block' : 'none';
+          const hidden = panel.style.display === 'none' || !panel.style.display;
+          panel.style.display = hidden ? 'block' : 'none';
         });
       });
 
@@ -327,7 +309,7 @@
       else alert("Rooms and CRs are only available in the modal.\n(Your browser does not support <dialog>.)");
     }
 
-    // (Optional legacy dblclick building schedule modal kept for reference)
+    // (Optional legacy dblclick building schedule)
     const dlg   = document.getElementById("schedDlg");
     const title = document.getElementById("schedTitle");
     const body  = document.getElementById("schedBody");
