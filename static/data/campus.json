@@ -8,22 +8,11 @@
     { "id": "canteen", "name": "Canteen", "x": -100, "y": 480, "w": 260, "h": 260, "img": "/static/img/buildings/canteen.png", "type": "building" },
     { "id": "hatchery", "name": "Hatchery", "x": -400, "y": 540, "w": 250, "h": 210, "img": "/static/img/buildings/hatchery.png", "type": "building" },
     { "id": "hmtm", "name": "HM/TM Building", "x": 650, "y": 460, "w": 280, "h": 340, "img": "/static/img/buildings/htm.png", "type": "building" },
-    { "id": "clinic", "name": "Clinic", "x": 340, "y": 200, "w": 120, "h": 120, "type": "building" },
+    { "id": "clinic", "name": "Clinic", "x": 260, "y": 200, "w": 400, "h": 400, "img": "/static/img/buildings/clinic.png", "type": "building" },
     { "id": "gate2", "name": "Gate 2", "x": 650, "y": 80, "w": 150, "h": 50, "type": "building" }
   ],
   "rooms": [
-    { "id": "mb-101", "name": "MB-101", "parent": "main_bldg", "type": "room"},
-    { "id": "mb-102", "name": "MB-102", "parent": "main_bldg", "type": "room" },
-    { "id": "mb-201", "name": "MB-201", "parent": "main_bldg", "type": "room" },
-    { "id": "mb-cr1", "name": "CR (Ground)", "parent": "main_bldg", "type": "cr" },
-    { "id": "it-101", "name": "IT-101", "parent": "it", "type": "room" },
-    { "id": "it-202", "name": "IT-202", "parent": "it", "type": "room" },
-    { "id": "it-cr1", "name": "CR (2F)", "parent": "it", "type": "cr" },
-    { "id": "hmtm-101", "name": "HM/TM-101", "parent": "hmtm", "type": "room" },
-    { "id": "hmtm-lab", "name": "HM/TM Lab", "parent": "hmtm", "type": "room" },
-    { "id": "hmtm-cr", "name": "CR", "parent": "hmtm", "type": "cr" },
-    { "id": "hatch-101", "name": "Hatchery-101", "parent": "hatchery", "type": "room" },
-    { "id": "hatch-cr", "name": "CR", "parent": "hatchery", "type": "cr" }
+  
   ], 
 "walkways": [
   { "from": "main_gate", "to": "activity", "via": [[420, 1020], [420, 820], [240, 820]] },

@@ -249,40 +249,53 @@
     const bCRs   = document.getElementById("bldgCRs");
     document.getElementById("closeBuildingDlg")?.addEventListener("click", () => bdlg.close());
 
-    function openBuildingModal(b) {
+    // function openBuildingModal(b) {
+    async function openBuildingModal(b) {
       bTitle.textContent = b.name;
 
-      const all = (data.rooms || []).filter(r => (r.parent || "") === b.id);
-      const rooms = all.filter(r => r.type === "room");
-      const crs   = all.filter(r => r.type === "cr");
+      // const all = (data.rooms || []).filter(r => (r.parent || "") === b.id);
+      // const rooms = all.filter(r => r.type === "room");
+      // const crs   = all.filter(r => r.type === "cr");
+      try {
+          // ✅ Call your Flask API to get live rooms
+          const res = await fetch("http://localhost:5000/api/v1/rooms/");
+          const allRooms = await res.json();
+
+          // ✅ Filter by parent building
+          const all = allRooms.filter(r => (r.parent || "") === b.id);
+          const rooms = all.filter(r => r.type === "room");
+          const crs   = all.filter(r => r.type === "cr");
 
       const renderSchedTable = (rows) => rows && rows.length ? `
         <table style="width:100%;border-collapse:collapse;margin-top:8px">
-          <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Subject</th><th>Section</th></tr></thead>
+          <thead><tr><th>Day</th><th>Start</th><th>End</th><th>Subject</th><th>Section</th><th>Teacher</th></tr></thead>
           <tbody>
             ${rows.map(r => `
-              <tr>
+              <tr style="text-align: center">
                 <td>${r.day || ""}</td>
                 <td>${r.start || ""}</td>
                 <td>${r.end || ""}</td>
                 <td>${r.subject || ""}</td>
                 <td>${r.section || ""}</td>
+                <td>${r.teacher || ""}</td>
               </tr>`).join("")}
           </tbody>
         </table>` : `<p style="margin:8px 0 0">No schedule available.</p>`;
 
+      // Rooms list (click to toggle schedule)
       if (rooms.length) {
         bRooms.innerHTML = rooms.map(r => `
-          <div class="row" data-room-id="${r.id}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fafafa;cursor:pointer;margin:6px 0">
+          <div class="row" data-room-id="${r.tag}" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fafafa;cursor:pointer;margin:6px 0">
             <div><strong>${r.name}</strong></div>
             <div class="badge" style="font-size:12px;padding:2px 8px;border-radius:999px;background:#e5e7eb">Click to view schedule</div>
           </div>
-          <div id="sched-${r.id}" class="hidden" style="display:none">${renderSchedTable(scheduleFor(r.id))}</div>
+          <div id="sched-${r.tag}" class="hidden" style="display:none"><p>Loading...</p></div>
         `).join("");
       } else {
         bRooms.innerHTML = `<p>No rooms defined for this building yet.</p>`;
       }
 
+      // CR lists
       if (crs.length) {
         bCRs.innerHTML = crs.map(c => `
           <div class="row" style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid #eee;border-radius:10px;background:#fafafa;margin:6px 0">
@@ -294,19 +307,46 @@
         bCRs.innerHTML = `<p>No CR listed for this building.</p>`;
       }
 
-      // Toggle schedules
+      // bind toggles
       bdlg.querySelectorAll('[data-room-id]').forEach(row => {
-        row.addEventListener('click', () => {
-          const id = row.getAttribute('data-room-id');
-          const panel = document.getElementById('sched-' + id);
-          if (!panel) return;
-          const hidden = panel.style.display === 'none' || !panel.style.display;
-          panel.style.display = hidden ? 'block' : 'none';
-        });
+        // row.addEventListener('click', () => {
+        //   const tag = row.getAttribute('data-room-id');
+        //   const panel = document.getElementById('sched-' + tag);
+        //   if (!panel) return;
+        //   const isHidden = panel.style.display === 'none' || !panel.style.display;
+        //   panel.style.display = isHidden ? 'block' : 'none';
+        // });
+        row.addEventListener('click', async () => {
+        const tag = row.getAttribute('data-room-id');
+        const panel = document.getElementById('sched-' + tag);
+        if (!panel) return;
+        const isHidden = panel.style.display === 'none' || !panel.style.display;
+
+        if (isHidden) {
+          panel.style.display = 'block';
+          panel.innerHTML = `<p>Loading...</p>`;
+          try {
+            const res = await fetch(`http://localhost:5000/api/v1/schedules/${tag}`);
+            if (!res.ok) throw new Error(`Schedules not found for ${tag}`);
+            const schedules = await res.json();
+            panel.innerHTML = renderSchedTable(schedules);
+          } catch (err) {
+            console.error(`❌ Failed to fetch schedules for ${tag}:`, err);
+            panel.innerHTML = `<p>Error loading schedules.</p>`;
+          }
+        } else {
+          panel.style.display = 'none';
+        }
+      });
       });
 
       if (typeof bdlg.showModal === "function") bdlg.showModal();
       else alert("Rooms and CRs are only available in the modal.\n(Your browser does not support <dialog>.)");
+      } catch (err) {
+      console.error("❌ Failed to load rooms from API:", err);
+      bRooms.innerHTML = `<p>Error loading rooms.</p>`;
+      bCRs.innerHTML = "";
+      }
     }
 
     // (Optional legacy dblclick building schedule)
