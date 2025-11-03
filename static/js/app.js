@@ -1,4 +1,12 @@
 // static/js/app.js
+function formatTimeTo12Hour(timeStr) {
+  const [hour, minute] = timeStr.split(":");
+  const h = parseInt(hour);
+  const suffix = h >= 12 ? "PM" : "AM";
+  const hour12 = ((h + 11) % 12 + 1);
+  return `${hour12}:${minute} ${suffix}`;
+}
+
 (async function () {
   try {
     const res = await fetch("/static/data/campus.json");
@@ -257,8 +265,8 @@
       // const rooms = all.filter(r => r.type === "room");
       // const crs   = all.filter(r => r.type === "cr");
       try {
-          // ✅ Call your Flask API to get live rooms 
-          const res = await fetch("https://python-ss4m.onrender.com/api/v1/rooms/"); 
+          // ✅ Call your Flask API to get live rooms
+          const res = await fetch("http://localhost:5000/api/v1/rooms/");
           const allRooms = await res.json();
 
           // ✅ Filter by parent building
@@ -273,8 +281,8 @@
             ${rows.map(r => `
               <tr style="text-align: center">
                 <td>${r.day || ""}</td>
-                <td>${r.start || ""}</td>
-                <td>${r.end || ""}</td>
+                <td>${formatTimeTo12Hour(r.start) || ""}</td>
+                <td>${formatTimeTo12Hour(r.end) || ""}</td>
                 <td>${r.subject || ""}</td>
                 <td>${r.section || ""}</td>
                 <td>${r.teacher || ""}</td>
@@ -326,7 +334,7 @@
           panel.style.display = 'block';
           panel.innerHTML = `<p>Loading...</p>`;
           try {
-            const res = await fetch(`https://python-ss4m.onrender.com/api/v1/schedules/${tag}`);
+            const res = await fetch(`http://localhost:5000/api/v1/schedules/${tag}`);
             if (!res.ok) throw new Error(`Schedules not found for ${tag}`);
             const schedules = await res.json();
             panel.innerHTML = renderSchedTable(schedules);
