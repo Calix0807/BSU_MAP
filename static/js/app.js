@@ -266,7 +266,7 @@ function formatTimeTo12Hour(timeStr) {
       // const crs   = all.filter(r => r.type === "cr");
       try {
           // ✅ Call your Flask API to get live rooms
-          const res = await fetch("http://localhost:5000/api/v1/rooms/");
+          const res = await fetch("https://python-ss4m.onrender.com/api/v1/rooms/");
           const allRooms = await res.json();
 
           // ✅ Filter by parent building
@@ -334,7 +334,7 @@ function formatTimeTo12Hour(timeStr) {
           panel.style.display = 'block';
           panel.innerHTML = `<p>Loading...</p>`;
           try {
-            const res = await fetch(`http://localhost:5000/api/v1/schedules/${tag}`);
+            const res = await fetch(`https://python-ss4m.onrender.com/api/v1/schedules/${tag}`);
             if (!res.ok) throw new Error(`Schedules not found for ${tag}`);
             const schedules = await res.json();
             panel.innerHTML = renderSchedTable(schedules);
