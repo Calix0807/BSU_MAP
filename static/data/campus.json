@@ -1,5 +1,6 @@
 {
   "canvas": { "width": 840, "height": 1100 },
+
   "buildings": [
     { "id": "main_gate", "name": "Main Gate", "x": 420, "y": 1020, "w": 150, "h": 50, "type": "building" },
     { "id": "activity", "name": "Activity Center", "x": 240, "y": 820, "w": 260, "h": 180, "img": "/static/img/buildings/activity.png", "type": "building" },
@@ -11,26 +12,44 @@
     { "id": "clinic", "name": "Clinic", "x": 260, "y": 200, "w": 400, "h": 400, "img": "/static/img/buildings/clinic.png", "type": "building" },
     { "id": "gate2", "name": "Gate 2", "x": 650, "y": 80, "w": 150, "h": 50, "type": "building" }
   ],
+
   "rooms": [
-  
-  ], 
-"walkways": [
-  { "from": "main_gate", "to": "activity", "via": [[420, 1020], [420, 820], [240, 820]] },
-  { "from": "main_gate", "to": "it",       "via": [[420, 1020], [420, 820], [650, 820]] },
-  { "from": "main_gate", "to": "main_bldg",
-    "via": [[420, 1020], [420, 660], [220, 660], [220, 600]]
-  },
-  { "from": "canteen",  "to": "main_bldg",
-    "via": [[-100, 600], [-100, 660], [220, 660], [220, 600]]
-  },
-  { "from": "hatchery", "to": "canteen",
-    "via": [[-400, 540], [-400, 660], [-100, 660]]
-  },
-  { "from": "main_gate", "to": "hmtm",   "via": [[420, 1020], [420, 460], [650, 460]] },
-  { "from": "main_gate", "to": "clinic", "via": [[420, 1020], [420, 240]] },
-  { "from": "clinic",    "to": "gate2",  "via": [[420, 240], [420, 80], [650, 80]] }
-], 
-  
+    { "id": "mb-101", "tag": "mb-101", "name": "Room 101", "parent": "main_bldg", "type": "room" },
+    { "id": "mb-102", "tag": "mb-102", "name": "Room 102", "parent": "main_bldg", "type": "room" },
+    { "id": "mb-201", "tag": "mb-201", "name": "Room 201", "parent": "main_bldg", "type": "room" },
+    { "id": "mb-cr1", "tag": "mb-cr1", "name": "Main Building CR", "parent": "main_bldg", "type": "cr" },
+
+    { "id": "it-101", "tag": "it-101", "name": "IT Room 101", "parent": "it", "type": "room" },
+    { "id": "it-202", "tag": "it-202", "name": "IT Room 202", "parent": "it", "type": "room" },
+    { "id": "it-cr1", "tag": "it-cr1", "name": "IT Building CR", "parent": "it", "type": "cr" },
+
+    { "id": "hmtm-101", "tag": "hmtm-101", "name": "HM/TM 101", "parent": "hmtm", "type": "room" },
+    { "id": "hmtm-lab", "tag": "hmtm-lab", "name": "HM/TM Laboratory", "parent": "hmtm", "type": "room" },
+    { "id": "hmtm-cr", "tag": "hmtm-cr", "name": "HM/TM CR", "parent": "hmtm", "type": "cr" },
+
+    { "id": "hatch-101", "tag": "hatch-101", "name": "Hatchery 101", "parent": "hatchery", "type": "room" },
+    { "id": "hatch-cr", "tag": "hatch-cr", "name": "Hatchery CR", "parent": "hatchery", "type": "cr" },
+
+    { "id": "clinic", "tag": "clinic", "name": "Clinic", "parent": "clinic", "type": "room" }
+  ],
+
+  "walkways": [
+    { "from": "main_gate", "to": "activity", "via": [[420, 1020], [420, 820], [240, 820]] },
+    { "from": "main_gate", "to": "it",       "via": [[420, 1020], [420, 820], [650, 820]] },
+    { "from": "main_gate", "to": "main_bldg",
+      "via": [[420, 1020], [420, 660], [220, 660], [220, 600]]
+    },
+    { "from": "canteen",  "to": "main_bldg",
+      "via": [[-100, 600], [-100, 660], [220, 660], [220, 600]]
+    },
+    { "from": "hatchery", "to": "canteen",
+      "via": [[-400, 540], [-400, 660], [-100, 660]]
+    },
+    { "from": "main_gate", "to": "hmtm",   "via": [[420, 1020], [420, 460], [650, 460]] },
+    { "from": "main_gate", "to": "clinic", "via": [[420, 1020], [420, 240]] },
+    { "from": "clinic",    "to": "gate2",  "via": [[420, 240], [420, 80], [650, 80]] }
+  ],
+
   "schedules": {
     "mb-101": [
       { "day": "Mon", "start": "08:00", "end": "09:30", "subject": "Programming 1", "section": "BSIT-1A" },
