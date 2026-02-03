@@ -36,12 +36,15 @@
       {% if rooms %}
         <div class="list">
           {% for r in rooms %}
-            <div class="row" data-room-id="{{ r.id }}">
+            {% set rid = r.tag if r.tag is defined and r.tag else r.id %}
+
+            <div class="row" data-room-id="{{ rid }}">
               <div><strong>{{ r.name }}</strong></div>
               <div class="badge">Click to view schedule</div>
             </div>
-            <div id="sched-{{ r.id }}" class="hidden">
-              {% set rs = schedules.get(r.id, []) %}
+
+            <div id="sched-{{ rid }}" class="hidden">
+              {% set rs = schedules.get(rid, []) %}
               {% if rs %}
                 <table>
                   <thead>
