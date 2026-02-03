@@ -250,6 +250,134 @@ function formatTimeTo12Hour(timeStr) {
 
     // (rest of your routing graph code stays the same)
     // ...
+// =====================
+// WALKWAYS + ROUTING
+// =====================
+const nodes   = {};   // key -> { x, y } campus coords
+const graph   = {};   // key -> neighbors
+const anchors = {};   // buildingId -> Set(nodeKey)
+let viaCounter = 0;
+
+const SNAP_EPS = 2;
+
+const findExistingKey = (x, y) => {
+  for (const [k, p] of Object.entries(nodes)) {
+    if (Math.abs(p.x - x) <= SNAP_EPS && Math.abs(p.y - y) <= SNAP_EPS) return k;
+  }
+  return null;
+};
+
+const addNode = (x, y) => {
+  const existing = findExistingKey(x, y);
+  if (existing) return existing;
+  const key = `v:${(viaCounter++).toString(36)}`;
+  nodes[key] = { x, y };
+  return key;
+};
+
+const addEdge = (a, b) => {
+  (graph[a] ||= []).push(b);
+  (graph[b] ||= []).push(a);
+};
+
+const addAnchor = (bid, nodeKey) => {
+  (anchors[bid] ||= new Set()).add(nodeKey);
+};
+
+// ✅ Draw walkways visibly: ALWAYS A -> via(s) -> B
+(data.walkways || []).forEach(w => {
+  if (!w || typeof w !== "object" || !w.from || !w.to) return;
+  const A = byId[w.from], B = byId[w.to];
+  if (!A || !B) return;
+
+  const vias = Array.isArray(w.via) ? w.via.slice() : [];
+
+  // IMPORTANT: include endpoints for drawing
+  const drawXY = [[A.x, A.y]].concat(vias).concat([[B.x, B.y]]);
+  const drawLatLng = drawXY.map(([x, y]) => [Y(y), x]);
+
+  L.polyline(drawLatLng, {
+    pane: 'pane-walkways',
+    weight: 6,
+    opacity: 0.95,
+    color: LINE_COLOR
+  }).addTo(walk)
+    .on("click", () => showInfo(`<b>Walkway:</b> ${A.name} ↔ ${B.name}`));
+
+  // Build graph nodes:
+  // If you have via points, connect them in order and anchor endpoints
+  if (vias.length) {
+    const seqKeys = vias.map(([x, y]) => addNode(x, y));
+    for (let i = 1; i < seqKeys.length; i++) addEdge(seqKeys[i - 1], seqKeys[i]);
+    addAnchor(w.from, seqKeys[0]);
+    addAnchor(w.to, seqKeys[seqKeys.length - 1]);
+  } else {
+    // If no via, connect building centers as a fallback
+    const k1 = addNode(A.x, A.y);
+    const k2 = addNode(B.x, B.y);
+    addEdge(k1, k2);
+    addAnchor(w.from, k1);
+    addAnchor(w.to, k2);
+  }
+});
+
+// Multi-source BFS (walkway nodes only)
+function bfsFromSources(sources, goalsSet) {
+  const q = [];
+  const prev = {};
+  sources.forEach(s => { q.push(s); prev[s] = null; });
+
+  while (q.length) {
+    const u = q.shift();
+    if (goalsSet.has(u)) {
+      const path = [];
+      for (let cur = u; cur != null; cur = prev[cur]) path.unshift(cur);
+      return path;
+    }
+    (graph[u] || []).forEach(v => {
+      if (!(v in prev)) { prev[v] = u; q.push(v); }
+    });
+  }
+  return null;
+}
+
+// Route button: draw RED route
+document.getElementById("routeBtn").onclick = () => {
+  route.clearLayers();
+  const sId = fromEl.value, tId = toEl.value;
+  if (!sId || !tId || sId === tId) return;
+
+  const srcAnchors = Array.from(anchors[sId] || []);
+  const dstAnchors = new Set(Array.from(anchors[tId] || []));
+
+  if (!srcAnchors.length || !dstAnchors.size) {
+    showInfo("No path: missing walkway anchors near one or both buildings.");
+    return;
+  }
+
+  const keyPath = bfsFromSources(srcAnchors, dstAnchors);
+  if (!keyPath) { showInfo("No path found."); return; }
+
+  const latlngs = keyPath.map(k => {
+    const { x, y } = nodes[k];
+    return [Y(y), x];
+  });
+
+  L.polyline(latlngs, {
+    pane: 'pane-route',
+    weight: 6,
+    opacity: 0.95,
+    color: "red"
+  }).addTo(route);
+
+  showInfo(`<b>Route:</b> ${byId[sId].name} → ${byId[tId].name}`);
+};
+
+document.getElementById("homeBtn").onclick = () => {
+  route.clearLayers();
+  map.fitBounds(bounds);
+  showInfo("Click a building to view rooms and schedules.");
+};
 
   } catch (e) {
     console.error(e);
